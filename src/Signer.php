@@ -5,23 +5,67 @@ namespace Jetfuel\Signer;
 class Signer
 {
     /**
-     * Create HMAC-SHA256 signature
+     * Generate HMAC-SHA256 signature only include timestamp.
+     * This signature CANNOT make sure your data is correct.
+     * https://en.wikipedia.org/wiki/Man-in-the-middle_attack
      *
-     * @param string $id
-     * @param string $secret
+     * @param string $appId
+     * @param string $appSecret
      * @param int $timestamp
+     * @return string
+     */
+    public static function signExceptContent($appId, $appSecret, $timestamp)
+    {
+        $baseString = $appId.'&'.$timestamp;
+
+        return self::hmacHash($baseString, $appSecret);
+    }
+
+    /**
+     * Generate HMAC-SHA256 signature.
+     * Content-Type: application/x-www-form-urlencoded
+     *
+     * @param string $appId
+     * @param string $appSecret
+     * @param int $timestamp
+     * @param string $method
      * @param string $baseUrl
      * @param array $parameters
      * @return string
      */
-    public static function sign($id, $secret, $timestamp, $baseUrl, $parameters = [])
+    public static function signFormContent($appId, $appSecret, $timestamp, $method, $baseUrl, $parameters = [])
     {
-        $encodedUrl = self::urlEncode(rtrim(strtok($baseUrl, '?'), '/'));
-        $encodedParameters = self::generateParameterString($parameters);
+        $method = strtoupper($method);
+        $baseUrl = self::urlEncode(rtrim(strtok($baseUrl, '?'), '/'));
+        $parameterString = self::buildParameterString($parameters);
 
-        $signData = $id.'&'.$timestamp.'&'.$encodedUrl.'&'.$encodedParameters;
+        $baseString = $appId.'&'.$timestamp.'&'.$method.'&'.$baseUrl.'&'.$parameterString;
 
-        return self::hmacHash($signData, $secret);
+        return self::hmacHash($baseString, $appSecret);
+    }
+
+    /**
+     * @param string $appId
+     * @param string $appSecret
+     * @param int $timestamp
+     * @param string $method
+     * @param string $baseUrl
+     * @param array $querys
+     * @param string $body
+     * @return string
+     */
+    public static function signJsonContent($appId, $appSecret, $timestamp, $method, $baseUrl, $querys = [], $body = '')
+    {
+        $method = strtoupper($method);
+        $baseUrl = self::urlEncode(rtrim(strtok($baseUrl, '?'), '/'));
+        $queryString = self::buildParameterString($querys);
+        $body = preg_replace('/\s+/', '', $body);
+
+        $baseString = $appId.'&'.$timestamp.'&'.$method.'&'.$baseUrl.'&'.$queryString.'&'.$body;
+
+        var_dump($baseString);
+
+        return self::hmacHash($baseString, $appSecret);
     }
 
     /**
@@ -35,22 +79,11 @@ class Signer
      * @param array $parameters
      * @return bool
      */
-    public static function compare($signature, $id, $secret, $timestamp, $baseUrl, $parameters = [])
-    {
-        return self::sign($id, $secret, $timestamp, $baseUrl, $parameters) === $signature;
-    }
-
-    /**
-     * Generate a keyed hash value using the HMAC-SHA256 method then to base64 format.
-     *
-     * @param string $data
-     * @param string $key
-     * @return string
-     */
-    private static function hmacHash($data, $key)
-    {
-        return base64_encode(hash_hmac('sha256', $data, $key, true));
-    }
+    // public function compare($signature, $id, $secret, $timestamp, $baseUrl, $parameters = [])
+    // {
+    //     // return hash_equals(base64_encode(hash_hmac('sha256', $body, $channelSecret, true)), $signature);
+    //     // return $this->sign($id, $secret, $timestamp, $baseUrl, $parameters) === $signature;
+    // }
 
     /**
      * URL encode according to RFC 3986 specifications.
@@ -69,10 +102,22 @@ class Signer
      * @param array $parameters
      * @return string
      */
-    private static function generateParameterString($parameters)
+    private static function buildParameterString($parameters)
     {
         ksort($parameters);
 
         return http_build_query($parameters, '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * Generate a keyed hash value using the SHA256 algorithm default and base64 format.
+     *
+     * @param string $data
+     * @param string $key
+     * @return string
+     */
+    private static function hmacHash($data, $key)
+    {
+        return base64_encode(hash_hmac('sha256', $data, $key, true));
     }
 }
