@@ -13,10 +13,10 @@ class Signer
      * @param string $method
      * @param string $baseUrl
      * @param array $parameters
-     * @param mixed $content
+     * @param string $content
      * @return string
      */
-    public static function sign($appId, $appSecret, $timestamp, $method, $baseUrl, $parameters = [], $content = '')
+    public static function sign($appId, $appSecret, $timestamp, $method, $baseUrl, array $parameters = [], $content = '')
     {
         $method = strtoupper($method);
         $baseUrl = self::urlEncode(self::removeQueryString($baseUrl));
@@ -38,23 +38,12 @@ class Signer
      * @param string $method
      * @param string $baseUrl
      * @param array $parameters
-     * @param mixed $content
+     * @param string $content
      * @return bool
      */
-    public function compare($signature, $appId, $appSecret, $timestamp, $method, $baseUrl, $parameters = [], $content = '')
+    public static function compare($signature, $appId, $appSecret, $timestamp, $method, $baseUrl, array $parameters = [], $content = '')
     {
         return hash_equals(self::sign($appId, $appSecret, $timestamp, $method, $baseUrl, $parameters, $content), $signature);
-    }
-
-    /**
-     * Remove line breaks and whitespace.
-     *
-     * @param $content
-     * @return mixed
-     */
-    private static function removeLineBreak($content)
-    {
-        return preg_replace('/\s+/', '', $content);
     }
 
     /**
@@ -66,6 +55,17 @@ class Signer
     private static function removeQueryString($url)
     {
         return rtrim(strtok($url, '?'), '/');
+    }
+
+    /**
+     * Remove line breaks and whitespace.
+     *
+     * @param $content
+     * @return mixed
+     */
+    private static function removeLineBreak($content)
+    {
+        return preg_replace('/\s+/', '', $content);
     }
 
     /**
@@ -85,7 +85,7 @@ class Signer
      * @param array $parameters
      * @return string
      */
-    private static function buildParameterString($parameters)
+    private static function buildParameterString(array $parameters)
     {
         ksort($parameters);
 
