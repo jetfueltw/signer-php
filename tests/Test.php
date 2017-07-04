@@ -52,7 +52,7 @@ class Test extends PHPUnit_Framework_TestCase
     {
         $appId = 'c86761be2c644b0db56cc00ab021621a';
         $appSecret = 'ffe877812ab842a1bc30b27751bbd6ac';
-        $timestamp = 1499056776;
+        $timestamp = 1499158061;
         $method = 'POST';
         $baseUrl = 'https://example.app/api/v1/players';
         $parameters = [
@@ -70,11 +70,11 @@ class Test extends PHPUnit_Framework_TestCase
             'publish_at' => 123546987,
             'ary'        => [98, 23, 45, 78],
             'foo'        => 'Dogs, Cats & Mice',
-        ], JSON_UNESCAPED_UNICODE);
+        ]);
 
         $signature = Signer::sign($appId, $appSecret, $timestamp, $method, $baseUrl, $parameters, $content);
 
-        $this->assertEquals($signature, '/WWyrU3CKCcpRK9r89lGNgxkU18hmAnYQMY5N6QYFKg=');
+        $this->assertEquals($signature, 'oNuThaOk/fTFzKMNTXU41j20lu//teREvjjOhxLDcL0=');
     }
 
     public function testSignPostUnicode()
@@ -93,11 +93,11 @@ class Test extends PHPUnit_Framework_TestCase
             'kk' => 'Бағандар бойынша өсу не кему ретімен орналастыруға болады',
             'zh' => '本頁主要刊登維基百科多種語言的排序的列表，最近一次更新於2015年5月18日',
             'pt' => 'O formato das datas não cumpre as normas da Convenção de nomenclatura da Wikipédia',
-        ], JSON_UNESCAPED_UNICODE);
+        ]);
 
         $signature = Signer::sign($appId, $appSecret, $timestamp, $method, $baseUrl, $parameters, $content);
 
-        $this->assertEquals($signature, 'nU1OduLgAWj9NqBh09visGv7W0c4XgnXQZZUpUlRFeo=');
+        $this->assertEquals($signature, 'WkOchGPoKKPLL9006NneJK+mOx4T1CfeknD7iNlSJ0k=');
     }
 
     public function testCompare()

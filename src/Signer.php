@@ -21,7 +21,6 @@ class Signer
         $method = strtoupper($method);
         $baseUrl = self::urlEncode(self::removeQueryString($baseUrl));
         $parameterString = self::buildParameterString($parameters);
-        $content = self::removeLineBreak($content);
 
         $baseString = $appId.'&'.$timestamp.'&'.$method.'&'.$baseUrl.'&'.$parameterString.'&'.$content;
 
@@ -55,17 +54,6 @@ class Signer
     private static function removeQueryString($url)
     {
         return rtrim(strtok($url, '?'), '/');
-    }
-
-    /**
-     * Remove line breaks and whitespace.
-     *
-     * @param $content
-     * @return mixed
-     */
-    private static function removeLineBreak($content)
-    {
-        return preg_replace('/\s+/', '', $content);
     }
 
     /**
