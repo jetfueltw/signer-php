@@ -63,7 +63,3 @@ $content = json_encode([
 $signature = Signer::sign($appId, $appSecret, $timestamp, $method, $baseUrl, $parameters, $content);
 // $signature === 'ipvDjcBgv5mt1SHhmJ7TM6nPhKz/Nwc/B8VsGNyY1Vs=';
 ```
-
-## License
-
-This package is licensed under the MIT license.
